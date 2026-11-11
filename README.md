@@ -103,7 +103,7 @@ how. Each variable becomes a CSS custom property:
 ## Stylesheets and other static files
 
 Everything in `public/` is linked into the forumify instance at
-`public/themes/forumify/thermal-theme/` when the theme is installed or refreshed.
+`public/themes/forumify/forumify-thermal-theme/` when the theme is installed or refreshed.
 Stylesheets listed in `getStylesheets()` are loaded on every page, anything else
 (images, fonts) can be referenced relative to them.
 
@@ -143,8 +143,8 @@ changes are live without publishing anything:
 
 ```bash
 cd /path/to/your/forumify-instance
-composer config repositories.thermal path /path/to/thermal
-composer require forumify/thermal-theme:@dev
+composer config repositories.forumify-thermal-theme path /path/to/forumify-thermal-theme
+composer require forumify/forumify-thermal-theme:@dev
 ```
 
 The theme then shows up under **Admin → Settings → Themes**, where you can activate it.
@@ -166,7 +166,7 @@ make quality-fix    # fix what phpcs can fix automatically
 1. Push the repository to GitHub.
 2. Submit it to [Packagist](https://packagist.org/packages/submit).
 3. Tag a release. Users install it with
-   `composer require forumify/thermal-theme`.
+   `composer require forumify/forumify-thermal-theme`.
 
 ## Documentation
 
