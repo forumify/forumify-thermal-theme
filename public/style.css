@@ -1,0 +1,662 @@
+/*
+ * Thermal: targeting optics in ironbow.
+ *
+ * Only forumify's framework classes are styled here (box, card, btn-*, menu, inputs,
+ * tables, tags, tabs, alerts, ...), so pages added by forumify or by plugins pick up the
+ * look without template overrides. Colours come from theme variables, which is what
+ * makes light and dark mode work: forumify swaps the variables, not this file.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Saira:wdth,wght@75..125,300..800&display=swap');
+
+:root {
+    color-scheme: var(--color-scheme, dark);
+    --thermal-scale: linear-gradient(
+        90deg,
+        var(--thermal-cold),
+        var(--thermal-cool) 22%,
+        var(--thermal-warm) 45%,
+        var(--thermal-hot) 65%,
+        var(--thermal-burn) 85%,
+        var(--thermal-white)
+    );
+    --thermal-hot-end: linear-gradient(100deg, var(--thermal-hot), var(--thermal-burn));
+    --thermal-heat-up: 0 0 0 1px color-mix(in srgb, var(--thermal-hot) 45%, transparent), 0 0 34px -10px var(--thermal-glow);
+    --thermal-wide: 125;
+    scrollbar-color: var(--c-elevation-5) var(--c-elevation-0);
+}
+
+::selection {
+    background-color: var(--thermal-hot);
+    color: #120a1f;
+}
+
+/* ------------------------------------------------------------------ sensor */
+
+body {
+    font-family: var(--thermal-font);
+    font-weight: 400;
+    line-height: 1.55;
+    background-color: var(--c-elevation-0);
+}
+
+/* The scope: range rings and a crosshair, centred off to the top right. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--thermal-reticle), var(--thermal-reticle)) 0 28% / 100% 1px no-repeat,
+        linear-gradient(var(--thermal-reticle), var(--thermal-reticle)) 78% 0 / 1px 100% no-repeat,
+        repeating-radial-gradient(circle at 78% 28%, transparent 0 139px, var(--thermal-reticle) 139px 140px);
+    mask-image: radial-gradient(circle at 78% 28%, #000 0 380px, transparent 720px);
+    -webkit-mask-image: radial-gradient(circle at 78% 28%, #000 0 380px, transparent 720px);
+}
+
+/* Sensor scanlines across the whole view. */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    opacity: var(--thermal-scanlines);
+    background: repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--c-elevation-0) 35%, transparent) 0 1px,
+        transparent 1px 3px
+    );
+}
+
+input,
+select,
+textarea,
+button {
+    font-family: var(--thermal-font);
+}
+
+*:focus-visible {
+    outline: 2px solid var(--thermal-burn);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ type */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--thermal-font);
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+/* Headlines are set expanded, the way optics overlays are. */
+h1,
+h2,
+h3 {
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' var(--thermal-wide);
+    letter-spacing: -0.015em;
+}
+
+h1 {
+    font-size: clamp(2rem, 3.8vw, 2.9rem);
+    font-weight: 700;
+}
+
+h2 {
+    font-size: clamp(1.55rem, 2.8vw, 2.1rem);
+}
+
+h3 {
+    font-size: 1.15rem;
+}
+
+.text-secondary {
+    font-weight: 400;
+}
+
+a {
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.header {
+    position: relative;
+    background-color: var(--c-elevation-1);
+    border-bottom: 0;
+    box-shadow: none;
+    margin-bottom: var(--spacing-10);
+}
+
+/* The camera's heat scale, with tick marks. */
+.header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 8px;
+    background:
+        repeating-linear-gradient(90deg, var(--c-elevation-0) 0 1px, transparent 1px 10%) 0 100% / 100% 3px no-repeat,
+        var(--thermal-scale) 0 0 / 100% 5px no-repeat;
+}
+
+.header > .responsive {
+    min-height: 66px;
+}
+
+.header-logo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' var(--thermal-wide);
+    letter-spacing: 0.01em;
+    color: var(--c-text-primary);
+}
+
+.header-logo img {
+    width: 36px;
+    height: 36px;
+    padding: 2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--c-elevation-1), var(--c-elevation-1)) padding-box, conic-gradient(from 200deg, var(--thermal-cold), var(--thermal-warm), var(--thermal-burn), var(--thermal-white), var(--thermal-cold)) border-box;
+}
+
+.header nav .btn-link {
+    font-weight: 600;
+    font-stretch: 112%;
+}
+
+.header nav .btn-link:hover {
+    color: var(--c-primary);
+}
+
+.header nav.border-r {
+    border-right: 1px solid var(--border-color);
+}
+
+/* ------------------------------------------------------------------ panels */
+
+/* Every panel has a heat edge along the top and warms up under the cursor. */
+.box,
+.card {
+    border: 1px solid var(--border-color);
+    background: var(--thermal-scale) 0 0 / 100% 3px no-repeat, var(--c-elevation-1);
+    box-shadow: 0 16px 40px -28px rgba(0, 0, 0, 0.6);
+    transition: box-shadow 260ms ease;
+}
+
+.box:hover,
+.card:hover {
+    box-shadow: var(--thermal-heat-up), 0 16px 40px -28px rgba(0, 0, 0, 0.6);
+}
+
+.box .box,
+.card .box,
+.box .card,
+.card .card {
+    background: var(--c-elevation-2);
+    box-shadow: none;
+}
+
+.card-title {
+    align-items: center;
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+.card-title h3,
+.card-title h4,
+.card-title h5 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: 1rem;
+    font-weight: 600;
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' var(--thermal-wide);
+}
+
+/* A small heat swatch in front of each section title. */
+.card-title h3::before,
+.card-title h4::before,
+.card-title h5::before {
+    content: '';
+    width: 22px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--thermal-scale);
+}
+
+.card-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+/* ------------------------------------------------------------------ buttons */
+
+.btn-primary,
+.btn-cta,
+.btn-outlined,
+.btn-outlined-highlighted,
+.btn-idp-discord {
+    font-weight: 600;
+    font-stretch: 112%;
+    letter-spacing: 0.01em;
+    padding: 0 var(--spacing-4);
+    transition: box-shadow 200ms ease, filter 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.btn-primary {
+    color: #120a1f;
+    background: var(--thermal-hot-end);
+}
+
+.btn-primary:hover {
+    color: #120a1f;
+    background: var(--thermal-hot-end);
+    filter: brightness(1.08);
+    box-shadow: 0 0 22px -4px var(--thermal-glow);
+}
+
+.btn-cta:hover {
+    box-shadow: 0 0 22px -4px var(--thermal-glow);
+}
+
+.btn-outlined,
+.btn-outlined-highlighted {
+    color: var(--c-text-primary);
+    border: 1px solid var(--border-color);
+    background-color: var(--c-elevation-1);
+}
+
+.btn-outlined:hover:not([disabled]):not(:disabled) {
+    color: var(--c-primary);
+    border-color: var(--thermal-hot);
+    background-color: var(--c-elevation-1);
+    box-shadow: 0 0 18px -6px var(--thermal-glow);
+}
+
+.btn-outlined-highlighted,
+.btn-outlined-highlighted:hover {
+    color: var(--c-text-primary);
+    border-color: var(--thermal-hot);
+    background-color: color-mix(in srgb, var(--thermal-hot) 14%, var(--c-elevation-1));
+}
+
+.btn-small {
+    padding: var(--spacing-1) var(--spacing-2);
+}
+
+.btn-link:hover {
+    background-color: var(--c-hover);
+}
+
+.dot {
+    background-color: var(--thermal-burn);
+    box-shadow: 0 0 8px var(--thermal-hot);
+}
+
+/* ------------------------------------------------------------------ menus */
+
+.menu,
+.reactions-menu,
+.profile-preview,
+.ts-dropdown,
+.rich-editor .ql-mention-list {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--thermal-scale) 0 0 / 100% 2px no-repeat, var(--c-elevation-2);
+    box-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.menu .btn-link:hover,
+.menu .btn-link.active {
+    background-color: var(--c-hover);
+    box-shadow: inset 2px 0 0 var(--thermal-hot);
+}
+
+/* ------------------------------------------------------------------ forms */
+
+select,
+textarea,
+input,
+.ts-control,
+.focus .ts-control,
+.ts-wrapper.single .ts-control,
+.form-row .pre,
+.file-upload {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--c-elevation-0);
+    font-size: 0.95rem;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+select:hover,
+textarea:hover,
+input:hover,
+.file-upload:hover {
+    border-color: color-mix(in srgb, var(--thermal-hot) 55%, var(--border-color));
+}
+
+select:focus,
+textarea:focus,
+input:focus,
+.file-upload.drag {
+    border-color: var(--thermal-hot);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--thermal-hot) 20%, transparent), 0 0 24px -8px var(--thermal-glow);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+    accent-color: var(--thermal-hot);
+    box-shadow: none;
+}
+
+.dropdown-active .ts-control {
+    border-radius: 4px 4px 0 0;
+}
+
+.ts-dropdown {
+    border-radius: 0 0 4px 4px;
+}
+
+.ts-wrapper.multi .ts-control [data-value] {
+    border-radius: 3px;
+    background: var(--thermal-hot-end);
+    color: #120a1f;
+}
+
+.rich-editor .ql-toolbar.ql-snow {
+    border: 1px solid var(--border-color);
+    border-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    background: var(--thermal-scale) 0 0 / 100% 2px no-repeat, var(--c-elevation-2);
+}
+
+.rich-editor .ql-container.ql-snow {
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 4px 4px;
+    background-color: var(--c-elevation-0);
+}
+
+/* ------------------------------------------------------------------ data */
+
+table {
+    background-color: transparent;
+}
+
+.table-wrapper {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--thermal-scale) 0 0 / 100% 3px no-repeat, var(--c-elevation-1);
+    overflow: hidden;
+}
+
+.box .table-wrapper,
+.card .table-wrapper {
+    border: 0;
+    background: none;
+}
+
+thead {
+    border-bottom: 1px solid var(--border-color);
+}
+
+thead th {
+    padding: var(--spacing-3);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-stretch: 112%;
+    color: var(--c-text-secondary);
+}
+
+tbody td {
+    padding: var(--spacing-2) var(--spacing-3);
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--c-hover);
+}
+
+tbody tr:not(.disabled):hover {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--thermal-hot) 14%, transparent), transparent 70%);
+}
+
+.pagination-selected-page {
+    display: inline-flex;
+    justify-content: center;
+    min-width: 30px;
+    border-radius: 4px;
+    background: var(--thermal-hot-end);
+    color: #120a1f;
+}
+
+.tablist {
+    gap: var(--spacing-1);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tablist > * {
+    border-radius: 4px 4px 0 0;
+}
+
+.tablist .active {
+    background: var(--thermal-scale) 0 100% / 100% 2px no-repeat, var(--c-hover);
+}
+
+.tag {
+    border: 0;
+    border-radius: 3px;
+    padding: 1px var(--spacing-2);
+    font-weight: 700;
+    font-stretch: 112%;
+}
+
+.progress {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--c-elevation-0);
+}
+
+.progress .progress-bar {
+    border-radius: 3px;
+    background: var(--thermal-scale);
+}
+
+.loader {
+    color: var(--thermal-hot);
+}
+
+/* ------------------------------------------------------------------ alerts */
+
+.alert-success,
+.alert-info,
+.alert-warning,
+.alert-error {
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+.modal {
+    background-color: color-mix(in srgb, var(--c-elevation-0) 70%, transparent);
+}
+
+/* ------------------------------------------------------------------ people */
+
+/* Avatars sit in a ring of the heat scale. */
+.avatar {
+    border: 2px solid transparent;
+    background: linear-gradient(var(--c-elevation-1), var(--c-elevation-1)) padding-box, conic-gradient(from 200deg, var(--thermal-cold), var(--thermal-warm), var(--thermal-burn), var(--thermal-white), var(--thermal-cold)) border-box;
+}
+
+.avatar-lg {
+    border-width: 4px;
+    box-shadow: 0 0 60px -10px var(--thermal-glow);
+}
+
+.thread-icon {
+    background: var(--thermal-hot-end);
+    color: #120a1f;
+}
+
+/* ------------------------------------------------------------------ forum */
+
+.breadcrumbs {
+    font-size: 0.85rem;
+    font-stretch: 112%;
+    margin-bottom: var(--spacing-5);
+}
+
+.forum-list {
+    gap: var(--spacing-8);
+}
+
+.forum-list .card h3 a {
+    color: var(--c-text-primary);
+}
+
+.forum-list .card h3 a:hover {
+    color: var(--c-primary);
+}
+
+.forum-list .card > ul > li,
+.topic-row {
+    transition: background-color 200ms ease;
+}
+
+/* A heat bloom follows the row you point at. */
+.forum-list .card > ul > li:hover,
+.topic-row:hover {
+    background: radial-gradient(90% 160% at 0% 50%, color-mix(in srgb, var(--thermal-hot) 13%, transparent), transparent 70%);
+}
+
+.forum-list .card > ul > li > div:last-child {
+    gap: var(--spacing-3);
+}
+
+.forum-subforums {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-1) var(--spacing-4);
+    margin-top: var(--spacing-2);
+    font-size: 0.9rem;
+}
+
+.topic-row h4,
+.topic-row h4.text-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.topic-header h2 {
+    font-size: clamp(1.55rem, 3vw, 2.2rem);
+}
+
+/* Each poster leaves a heat signature behind their avatar. */
+.comment .comment-author {
+    background:
+        radial-gradient(circle at 50% 46px, color-mix(in srgb, var(--thermal-hot) 30%, transparent), color-mix(in srgb, var(--thermal-warm) 14%, transparent) 70px, transparent 130px),
+        var(--c-elevation-2);
+}
+
+@media screen and (min-width: 900px) {
+    .comment .comment-author {
+        border-right: 1px solid var(--border-color);
+    }
+
+    .comment .comment-author .avatar {
+        width: 56px;
+        height: 56px;
+    }
+}
+
+.comment .comment-author > a {
+    font-weight: 600;
+    font-stretch: 112%;
+}
+
+.comment.answer {
+    border-color: var(--c-success-text);
+    background: linear-gradient(90deg, var(--c-success-text), transparent) 0 0 / 100% 2px no-repeat, var(--c-elevation-1);
+}
+
+.comment.selected {
+    border: 1px solid var(--thermal-burn);
+    box-shadow: var(--thermal-heat-up);
+}
+
+.rich-text blockquote {
+    border-left: 3px solid var(--thermal-hot);
+}
+
+.forumify-quote,
+.rich-text .forumify-quote,
+.rich-editor .forumify-quote {
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--thermal-hot);
+    border-radius: 4px;
+    background-color: var(--c-elevation-2);
+}
+
+.rich-text pre,
+.rich-text .ql-code-block-container {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--c-elevation-0);
+}
+
+.rich-text code {
+    padding: 0 0.3em;
+    border-radius: 3px;
+    background-color: var(--c-elevation-3);
+}
+
+.rich-text pre code {
+    padding: 0;
+    background: none;
+}
+
+.thread-row {
+    border-radius: 4px;
+}
+
+.thread-active {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--thermal-hot) 16%, transparent), transparent);
+}
+
+/* ------------------------------------------------------------------ auth */
+
+.auth-website-logo {
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--border-color), 0 0 90px -10px var(--thermal-glow);
+}
+
+/* ------------------------------------------------------------------ footer */
+
+footer {
+    font-size: 0.8rem;
+    font-stretch: 112%;
+    color: var(--c-text-secondary);
+    margin-top: var(--spacing-12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .box,
+    .card,
+    .btn-primary,
+    .btn-outlined,
+    .topic-row {
+        transition: none;
+    }
+}
